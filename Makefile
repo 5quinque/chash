@@ -1,5 +1,5 @@
 CC=gcc
-FLAGS=-Wall -Wextra -Wshadow -std=c99 -g -O3 -Wno-unused-variable
+FLAGS=-Wall -Wextra -Wshadow -std=c99 -g -O3 -Wno-unused-variable -Wno-unused-parameter
 LIBS=-lpng -lm
 BIN=/usr/bin/
 OBJS=./bin/chash_png.o

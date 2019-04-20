@@ -61,25 +61,26 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  if (!png_setup(&png_ptr, &info_ptr, &end_info))
+  //printf("main: address of png_ptr %p \n", &png_ptr);
+  if (!png_setup(&png_ptr, &info_ptr, &end_info)) {
+    printf("error setting up png\n");
     fclose(fp);
+
+    return 0;
+  }
   
 
   /* let libpng know that there are
    * some bytes missing from the start of the file.
    */
-  /*
   png_set_sig_bytes(png_ptr, PNG_BYTES_TO_CHECK);
   png_init_io(png_ptr, fp);
 
+  /* read the image */
   png_get_image_and_info(png_ptr, info_ptr, &row_pointers, &width, &height, &color_type);
-  
   png_get_colours(row_pointers, width, height, color_type, &colours);
-  */
-
 
   /* clean up */
-  /*
   png_read_end(png_ptr, end_info);
   png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
 
@@ -88,7 +89,7 @@ int main(int argc, char **argv) {
   }
 
   free(row_pointers);
-  */
+  
   fclose(fp);
 
   return 0;

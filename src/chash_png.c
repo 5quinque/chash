@@ -105,42 +105,46 @@ void png_get_colours(png_bytep *row_pointers, png_uint_32 width,
       fg->green = row_pointers[row][col+1];
       fg->blue = row_pointers[row][col+2];
       fg->alpha = row_pointers[row][col+3];
+
+      printf("%d %d %d %d  ", fg->red, fg->green, fg->blue, fg->alpha);
     }
+    printf("\n");
   }
 }
 
 int png_setup(png_structp *png_ptr, png_infop *info_ptr, png_infop *end_info) {
+  //printf("png_setup: address of png_ptr %p \n", &*png_ptr);
+  
   /* Setup png_struct and png_info structs */
-  png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-  if (!png_ptr) {
+  *png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if (!*png_ptr) {
     printf("Error creating png_ptr\n");
-    return 1;
+    return 0;
   }
 
-  //info_ptr = png_create_info_struct(png_ptr);
-  //if (!info_ptr) {
-  //  png_destroy_read_struct(&png_ptr,
-  //    (png_infopp)NULL, (png_infopp)NULL);
-  //  printf("Error creating info_ptr\n");
-  //  return 1;
-  //}
+  *info_ptr = png_create_info_struct(*png_ptr);
+  if (!*info_ptr) {
+    png_destroy_read_struct(&*png_ptr,
+      (png_infopp)NULL, (png_infopp)NULL);
+    printf("Error creating info_ptr\n");
+    return 0;
+  }
 
-  //end_info = png_create_info_struct(png_ptr);
-  //if (!end_info) {
-  //  png_destroy_read_struct(&png_ptr, &info_ptr,
-  //    (png_infopp)NULL);
-  //}
+  *end_info = png_create_info_struct(*png_ptr);
+  if (!*end_info) {
+    png_destroy_read_struct(&*png_ptr, &*info_ptr,
+      (png_infopp)NULL);
+    return 0;
+  }
 
-  ///* instead of `setjmp` we could compile with PNG_SETJMP_NOT_SUPPORTED */
-  ///* pg. 8 http://www.libpng.org/pub/png/libpng-1.4.0-manual.pdf */
-  //if (setjmp(png_jmpbuf(png_ptr))) {
-  //  png_destroy_read_struct(&png_ptr, &info_ptr,
-  //      &end_info);
-  //  printf("libpng encountered an error\n");
-  //  return 1;
-  //}
-  return 0;
+  /* instead of `setjmp` we could compile with PNG_SETJMP_NOT_SUPPORTED */
+  /* pg. 8 http://www.libpng.org/pub/png/libpng-1.4.0-manual.pdf */
+  if (setjmp(png_jmpbuf(*png_ptr))) {
+    png_destroy_read_struct(&*png_ptr, &*info_ptr,
+        &*end_info);
+    printf("libpng encountered an error\n");
+    return 0;
+  }
+  return 1;
 }
-
-
 
