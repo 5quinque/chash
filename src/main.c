@@ -32,7 +32,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define _POSIX_SOURCE 1
 #define USAGE "Usage: chash [image path] [-vth]"
 
-void handle_args(int argc, char **argv, char **image_path);
+int handle_args(int argc, char **argv, char **image_path);
 
 int main(int argc, char **argv) {
   char *image_path = NULL;
@@ -46,47 +46,42 @@ int main(int argc, char **argv) {
   int color_type;
   struct rgb colours;
 
-  handle_args(argc, argv, &image_path);
+  int mimetype = 0;
 
-  if (!image_path) {
-    printf("%s\n", USAGE);
+  if (!handle_args(argc, argv, &image_path)) {
     return 1;
   }
 
   fp = fopen(image_path, "rb");
 
+  switch (mimetype) {  
+  case 0:
+    if (!png_prechecks(image_path, &fp)) {
+      return 1;
+    }
   
-  // [todo] if mimetype == png
-  if (!png_prechecks(image_path, &fp)) {
-    return 1;
-  }
-
-  //printf("main: address of png_ptr %p \n", &png_ptr);
-  if (!png_setup(&png_ptr, &info_ptr, &end_info)) {
-    printf("error setting up png\n");
-    fclose(fp);
-
-    return 0;
-  }
+    //printf("main: address of png_ptr %p \n", &png_ptr);
+    if (!png_setup(&png_ptr, &info_ptr, &end_info, &fp)) {
+      printf("error setting up png\n");
+      fclose(fp);
   
-
-  /* let libpng know that there are
-   * some bytes missing from the start of the file.
-   */
-  png_set_sig_bytes(png_ptr, PNG_BYTES_TO_CHECK);
-  png_init_io(png_ptr, fp);
-
-  /* read the image */
-  png_get_image_and_info(png_ptr, info_ptr, &row_pointers, &width, &height, &color_type);
-  png_get_colours(row_pointers, width, height, color_type, &colours);
-
-  /* clean up */
-  png_read_end(png_ptr, end_info);
-  png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
-
-  for (png_uint_32 row = 0; row < height; row++) {
-    free(row_pointers[row]);
+      return 1;
+    }  
+  
+    /* read the image */
+    png_get_image_and_info(png_ptr, info_ptr, &row_pointers, &width, &height, &color_type);
+    png_get_colours(row_pointers, width, height, color_type, &colours);
+  
+    /* clean up */
+    png_read_end(png_ptr, end_info);
+    png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+  
+    for (png_uint_32 row = 0; row < height; row++) {
+      free(row_pointers[row]);
+    }
+    break;
   }
+
 
   free(row_pointers);
   
@@ -95,25 +90,34 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void handle_args(int argc, char **argv, char **image_path) {
+int handle_args(int argc, char **argv, char **image_path) {
   int c;
 
   while ((c = getopt(argc, argv, "vth")) != -1) {
     switch (c) {
     case 'v':
       printf("version 0.0.0\n");
-      return;
+      return 0;
       break;
     case 'h':
     case '?':
       printf("%s\n", USAGE);
-      return;
+      return 0;
+      break;
     default:
       break;
     }
   }
+
   for (int index = optind; index < argc; index++) {
     *image_path = argv[index];
   }
+
+  if (!*image_path) {
+    printf("%s\n", USAGE);
+    return 0;
+  }
+
+  return 1;
 }
 

@@ -67,7 +67,7 @@ int png_prechecks(char *file_name, FILE **fp) {
   /* Is the file a PNG? */
   is_png = check_if_png(&*fp);
   if (!is_png) {
-    printf("Error file: %s, is not a PNG file\n", file_name);
+    printf("Error: %s, is not a PNG file\n", file_name);
     return 0;
   }
 
@@ -112,7 +112,7 @@ void png_get_colours(png_bytep *row_pointers, png_uint_32 width,
   }
 }
 
-int png_setup(png_structp *png_ptr, png_infop *info_ptr, png_infop *end_info) {
+int png_setup(png_structp *png_ptr, png_infop *info_ptr, png_infop *end_info, FILE **fp) {
   //printf("png_setup: address of png_ptr %p \n", &*png_ptr);
   
   /* Setup png_struct and png_info structs */
@@ -145,6 +145,16 @@ int png_setup(png_structp *png_ptr, png_infop *info_ptr, png_infop *end_info) {
     printf("libpng encountered an error\n");
     return 0;
   }
+
+
+  /* let libpng know that there are
+   * some bytes missing from the start of the file
+   * from signature check in `check_if_png`
+   */
+  png_set_sig_bytes(*png_ptr, PNG_BYTES_TO_CHECK);
+  png_init_io(*png_ptr, *fp);
+
+
   return 1;
 }
 

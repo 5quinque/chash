@@ -23,7 +23,7 @@ int png_prechecks(char *file_name, FILE **fp);
 int check_if_png(FILE **fp);
 int png_get_image_and_info(png_structp png_ptr, png_infop info_ptr,
     png_bytep **row_pointers, png_uint_32 *width, png_uint_32 *height, int *color_type);
-int png_setup(png_structp *png_ptr, png_infop *info_ptr, png_infop *end_info);
+int png_setup(png_structp *png_ptr, png_infop *info_ptr, png_infop *end_info, FILE **fp);
 
 struct rgb {
   int red;
