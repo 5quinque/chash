@@ -106,7 +106,8 @@ void png_get_colours(png_bytep *row_pointers, png_uint_32 width,
       fg->blue = row_pointers[row][col+2];
       fg->alpha = row_pointers[row][col+3];
 
-      printf("%d %d %d %d  ", fg->red, fg->green, fg->blue, fg->alpha);
+      printf("%3d %3d %3d\t", fg->red, fg->green, fg->blue);
+      //printf("%d %d %d %d  ", fg->red, fg->green, fg->blue, fg->alpha);
     }
     printf("\n");
   }

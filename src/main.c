@@ -33,20 +33,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #define USAGE "Usage: chash [image path] [-vth]"
 
 int handle_args(int argc, char **argv, char **image_path);
+int read_png(FILE *fp, char *image_path, png_bytep *row_pointers);
 
 int main(int argc, char **argv) {
   char *image_path = NULL;
   FILE *fp;
-  png_structp png_ptr;
-  png_infop info_ptr;
-  png_infop end_info;
-  png_uint_32 width;
-  png_uint_32 height;
-  png_bytep *row_pointers = NULL;
-  int color_type;
-  struct rgb colours;
-
   int mimetype = 0;
+  png_bytep *row_pointers = NULL;
 
   if (!handle_args(argc, argv, &image_path)) {
     return 1;
@@ -56,38 +49,60 @@ int main(int argc, char **argv) {
 
   switch (mimetype) {  
   case 0:
-    if (!png_prechecks(image_path, &fp)) {
-      return 1;
-    }
-  
-    //printf("main: address of png_ptr %p \n", &png_ptr);
-    if (!png_setup(&png_ptr, &info_ptr, &end_info, &fp)) {
-      printf("error setting up png\n");
-      fclose(fp);
-  
-      return 1;
-    }  
-  
-    /* read the image */
-    png_get_image_and_info(png_ptr, info_ptr, &row_pointers, &width, &height, &color_type);
-    png_get_colours(row_pointers, width, height, color_type, &colours);
-  
-    /* clean up */
-    png_read_end(png_ptr, end_info);
-    png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
-  
-    for (png_uint_32 row = 0; row < height; row++) {
-      free(row_pointers[row]);
-    }
+    read_png(fp, image_path, row_pointers);
     break;
   }
-
 
   free(row_pointers);
   
   fclose(fp);
 
   return 0;
+}
+
+int read_png(FILE *fp, char *image_path, png_bytep *row_pointers) {
+  png_structp png_ptr;
+  png_infop info_ptr;
+  png_infop end_info;
+  png_uint_32 width;
+  png_uint_32 height;
+  int color_type;
+  struct rgb colours;
+
+  if (!png_prechecks(image_path, &fp)) {
+    return 0;
+  }
+
+  if (!png_setup(&png_ptr, &info_ptr, &end_info, &fp)) {
+    printf("error setting up png\n");
+    fclose(fp);
+
+    return 0;
+  }  
+
+  /* read the image */
+  png_get_image_and_info(png_ptr, info_ptr, &row_pointers, &width, &height, &color_type);
+  png_get_colours(row_pointers, width, height, color_type, &colours);
+
+  /* clean up */
+  png_read_end(png_ptr, end_info);
+  png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+
+  for (png_uint_32 row = 0; row < height; row++) {
+    free(row_pointers[row]);
+  }
+
+  return 0;
+}
+
+int grayscale(png_bytep *row_pointers) {
+  //row_pointers[0][0] = 255;
+  //row_pointers[0][1] = 255;
+  //row_pointers[0][2] = 255;
+  //png_set_rows(png_ptr, info_ptr, row_pointers);
+  //png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NULL);
+  
+  return 1;
 }
 
 int handle_args(int argc, char **argv, char **image_path) {
