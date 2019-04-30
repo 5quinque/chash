@@ -155,7 +155,43 @@ int png_setup(png_structp *png_ptr, png_infop *info_ptr, png_infop *end_info, FI
   png_set_sig_bytes(*png_ptr, PNG_BYTES_TO_CHECK);
   png_init_io(*png_ptr, *fp);
 
-
   return 1;
+}
+
+int read_png(FILE *fp, char *image_path, png_bytep *row_pointers) {
+  png_structp png_ptr;
+  png_infop info_ptr;
+  png_infop end_info;
+  png_uint_32 width;
+  png_uint_32 height;
+  int color_type;
+  struct rgb colours;
+
+  if (!png_prechecks(image_path, &fp)) {
+    return 0;
+  }
+
+  if (!png_setup(&png_ptr, &info_ptr, &end_info, &fp)) {
+    printf("error setting up png\n");
+    fclose(fp);
+
+    return 0;
+  }  
+
+  /* read the image */
+  png_get_image_and_info(png_ptr, info_ptr, &row_pointers, &width, &height, &color_type);
+
+  /* print pixel values */
+  png_get_colours(row_pointers, width, height, color_type, &colours);
+
+  /* clean up */
+  png_read_end(png_ptr, end_info);
+  png_destroy_read_struct(&png_ptr, &info_ptr, &end_info);
+
+  for (png_uint_32 row = 0; row < height; row++) {
+    free(row_pointers[row]);
+  }
+
+  return 0;
 }
 

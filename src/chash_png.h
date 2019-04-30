@@ -35,4 +35,6 @@ struct rgb {
 void png_get_colours(png_bytep *row_pointers, png_uint_32 width,
     png_uint_32 height, int color_type, struct rgb *fg);
 
+int read_png(FILE *fp, char *image_path, png_bytep *row_pointers);
+
 #define PNG_BYTES_TO_CHECK 8
