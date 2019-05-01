@@ -19,22 +19,5 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 */
 
-int png_prechecks(char *file_name, FILE **fp);
-int check_if_png(FILE **fp);
-int png_get_image_and_info(png_structp png_ptr, png_infop info_ptr,
-    png_bytep **row_pointers, png_uint_32 *width, png_uint_32 *height, int *color_type);
-int png_setup(png_structp *png_ptr, png_infop *info_ptr, png_infop *end_info, FILE **fp);
+void test();
 
-struct rgb {
-  int red;
-  int green;
-  int blue;
-  int alpha;
-};
-
-void png_get_colours(png_bytep *row_pointers, png_uint_32 width,
-    png_uint_32 height, int color_type, struct rgb *fg);
-
-int read_png(FILE *fp, char *image_path);
-
-#define PNG_BYTES_TO_CHECK 8

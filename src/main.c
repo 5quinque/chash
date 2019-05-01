@@ -23,40 +23,65 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <math.h>
+//#include <math.h>
 #include <getopt.h>
 #include <sys/ioctl.h>
 #include <png.h>
+#include <jpeglib.h>
 #include "chash_png.h"
 
 #define _POSIX_SOURCE 1
 #define USAGE "Usage: chash [image path] [-vth]"
 
 int handle_args(int argc, char **argv, char **image_path);
+int get_mimetype(FILE *fp);
 
 int main(int argc, char **argv) {
   char *image_path = NULL;
   FILE *fp;
   int mimetype = 0;
-  png_bytep *row_pointers = NULL;
 
   if (!handle_args(argc, argv, &image_path)) {
     return 1;
   }
 
   fp = fopen(image_path, "rb");
+  if (!fp) {
+    printf("Error opening file: %s\n", image_path);
+    return 0;
+  }
+
+  mimetype = get_mimetype(fp);
 
   switch (mimetype) {  
   case 0:
-    read_png(fp, image_path, row_pointers);
+    read_png(fp, image_path);
+    break;
+  case 1:
+    printf("Reading jpeg..\n");
+    //read_jpeg(fp, image_path);
+    break;
+  default:
+    printf("%s\n", USAGE);
+    return 1;
     break;
   }
 
-  free(row_pointers);
-  
   fclose(fp);
 
   return 0;
+}
+
+// [todo] check for jpeg
+int get_mimetype(FILE *fp) {
+  int is_png;
+  is_png = check_if_png(&fp);
+
+  if (is_png) {
+    return 0;
+  }
+
+  return 1;
 }
 
 int grayscale(png_bytep *row_pointers) {

@@ -158,18 +158,21 @@ int png_setup(png_structp *png_ptr, png_infop *info_ptr, png_infop *end_info, FI
   return 1;
 }
 
-int read_png(FILE *fp, char *image_path, png_bytep *row_pointers) {
+int read_png(FILE *fp, char *image_path) {
   png_structp png_ptr;
   png_infop info_ptr;
   png_infop end_info;
   png_uint_32 width;
   png_uint_32 height;
+  png_bytep *row_pointers = NULL;
   int color_type;
   struct rgb colours;
 
+  /* no longer need to do this
   if (!png_prechecks(image_path, &fp)) {
     return 0;
   }
+  */
 
   if (!png_setup(&png_ptr, &info_ptr, &end_info, &fp)) {
     printf("error setting up png\n");
@@ -191,6 +194,7 @@ int read_png(FILE *fp, char *image_path, png_bytep *row_pointers) {
   for (png_uint_32 row = 0; row < height; row++) {
     free(row_pointers[row]);
   }
+  free(row_pointers);
 
   return 0;
 }
